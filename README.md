@@ -26,12 +26,14 @@
  + Store many different game maps in the program for if the player wants to continously play
  
  ---MORE ON THE GUI---
+ 
 The GUI(PlayGameGui) contains many bugs and was not completed. So far, it only allows the user to stay in one room and select options but the images do not change as the function wasn't included and the final hangman game and room was not included either. It is provided here for possible future fixing but in no way provides efficiency or completion.
 + frame type that requires the programmer to manually enter the coordinates of the labels and text. This frame is most likely the most bug prone relative to the other types.
 + not finding the way to appropriately fix the image name to Jbutton in the GUI
 Fundamentally, this code has not been cleaned up and the bugs that arise dont appear to be able to be consolidated. When running, certain JButtons will not appear unless the user hovers over the program with the cursor.
  
  ---GAME LAYOUT--- 
+ 
 Since the game GUI is still ineffective, it is best if the user sets it up on an IDE or terminal, running it from the playDriver class.
 
  TRAVERSING:Every key value present contains a corresponding door value in which they interact together depending on
@@ -48,6 +50,7 @@ Since the game GUI is still ineffective, it is best if the user sets it up on an
 
 
 ---GENERAL---
+
 When playing the game using the PlayGame driver, the program prompts the user with text through the interactions panel and allows the user to respond using text input. The numbered square brackets represent the rooms that are connected to the current room the player is int. A plus sign indicates that the door is unlocked and a negative sign indicates that the door is locked. To unlock a locked door, the user is prompted with a set of ten keys, from which they have three chances to choose the correct one to unlock the door (later versions of the game can include more interesting text interactions with the doors and keys).
 
 Once the user successfully makes their way through the map and enters the 10th room[in this case], they are prompted to play a game of hangman to save the don in distress who is being held captive by a dragon. 
