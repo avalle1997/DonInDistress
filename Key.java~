@@ -1,0 +1,97 @@
+/**
+ * Key.java
+ * for Adventure Time
+ * Created by: Jessenia Aguilar-Hernandez
+ * Modified By: Lauren Luo & Adrianna Valle
+ */
+
+public class Key implements Comparable<Key> {
+  
+  private String keyName; //the name of the object
+  private String activeMsg; //response if key is active
+  private String inactiveMsg; //response if key is inactive
+  private boolean active; //true if key is able to open a door, false if not
+  //^^may not need this variable - get rid of it and all corresponding methods
+  
+  /**
+   * Constructor takes in key name and text for user interaction purposes
+   */
+  public Key(String k, String activeMsg, String inactiveMsg){
+    keyName = k;
+    this.activeMsg = activeMsg;
+    this.inactiveMsg = inactiveMsg;
+    active = false;
+  }
+  
+  /**
+   * Returns the name of the key
+   */
+  public String getName(){
+    return keyName;
+  }
+ 
+  /**
+   * Returns response, depending on whether or not the key is active
+   */
+  public String getResponse(){
+    String response = "";
+    if(active)
+      response = activeMsg;
+    else
+      response = inactiveMsg;
+    return response; 
+  }
+  
+  public String getActiveMsg(){
+    return activeMsg; 
+  }
+  
+  public String getInactiveMsg(){
+    return inactiveMsg;
+  }
+  
+  /**
+   * Returns activation status of the key
+   */
+  public boolean getActivation(){
+    return active;
+  }
+  
+  /**
+   * Sets activation status of the key to active
+   */
+  public void setActive() {
+    active = true;
+  }
+  
+  /**
+   * Returns an individual copy of the key
+   */
+  public Key copyKey() {
+    return new Key(keyName, activeMsg, inactiveMsg);
+  }
+  
+  /**
+   * Compares this key with other key object. 
+   * Uses String compareTo.
+   */
+  public int compareTo(Key other) {
+    return keyName.compareTo(other.getName());
+  }
+  
+  /**
+   * Returns String representation of the object.
+   * For testing purposes
+   */
+  public String toString() {
+    return keyName;
+  }
+  
+  public static void main(String[] args){
+    //Key el = new Key("apple","");
+//    System.out.println(el.getKey());
+//    el.setInstructions("Find the item!");
+//    System.out.println(el.getInstructions());
+
+  }
+}

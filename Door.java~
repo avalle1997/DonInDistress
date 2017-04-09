@@ -1,0 +1,41 @@
+/**
+ * Door.java
+ * Written By: Lauren Luo & Adrianna Valle
+ */
+
+public class Door {
+  private String lockedMsg, unlockedMsg;
+  private int weight; //a weight of 0 => door is unlocked
+  //public static final UNLOCKED_RESPONSE = " You approach the door. The door is unlocked";
+  
+  public Door(int weight,  String lockedMsg, String unlockedMsg) {
+    this.weight = weight;
+    this.lockedMsg = lockedMsg;
+    this.unlockedMsg = unlockedMsg;  
+  }
+ 
+  //If true, replace door object in Graph
+  public boolean rightKey(Key key){
+   return GameMap.getAllKeys().get(weight).compareTo(key) == 0;
+  }
+  
+  public int getWeight() {
+    return weight;
+  }
+  
+  public String getUnlockedMsg() {
+    return unlockedMsg; 
+  }
+  
+  public String getLockedMsg() {
+    return lockedMsg; 
+  }
+  
+  public boolean isLocked() {
+    return weight > 0;
+  }
+  
+  public String toString() {
+    return weight + " || " + lockedMsg + " || " + unlockedMsg;
+  }
+}

@@ -1,0 +1,296 @@
+/**
+ * GameMap.java
+ * Written By: Lauren Luo
+ * Written On: Dec 16, 2016
+ * 
+ * Preconditions:
+ * User created a valid map in which the room numbers correspond to valid keys
+ */
+import java.util.*;
+import java.io.*;
+
+public class GameMap {
+  //instance variables
+  private AdjMatGraph<String> map; 
+  private Room currentRoom, finalRoom;
+  private LinkedList<Room> allRooms;
+  private Hashtable<Room, LinkedList<Room>> rooms;
+  private static Hashtable<Integer, Key> allKeys; //will contain 25 keys
+  private static Hashtable<Integer, Door> allDoors;
+  private int chancesLeft;
+  private static final int MAX_CHANCES = 3; 
+  
+  public GameMap() {
+    map = new AdjMatGraph<String>();
+    try {
+      AdjMatGraph.loadTGF("gameMap.tgf", map);
+    } catch (FileNotFoundException ex) {
+      System.out.println("error: file not found");
+    }
+    
+    chancesLeft = MAX_CHANCES;
+    currentRoom = null;
+    finalRoom = null;
+    allRooms = new LinkedList<Room>();
+    rooms = new Hashtable<Room, LinkedList<Room>>();
+    allKeys = new Hashtable<Integer, Key>();
+    allDoors = new Hashtable<Integer, Door>();
+    
+    buildKeyDict("keyText.txt");
+    buildDoorDict("doorText.txt");
+    buildRooms();
+    
+    currentRoom = getRoom("1room");
+    finalRoom = getRoom("10room");
+  }
+  
+  private void buildKeyDict(String fileIn) {
+    try {
+      Scanner sc = new Scanner(new File(fileIn));
+      int count = 1;
+      
+      while (sc.hasNextLine()) {
+        String temp = sc.nextLine().trim();
+        
+        String name = temp.substring(0, temp.indexOf("+")).trim();
+        temp = temp.substring(temp.indexOf("+")+1).trim();
+        String activeMsg = temp.substring(0, temp.indexOf("+")).trim();
+        temp = temp.substring(temp.indexOf("+")+1).trim();
+        String inactiveMsg = temp;
+        
+        allKeys.put(count, new Key(name, activeMsg, inactiveMsg));
+        count++;
+      } 
+      sc.close();
+    } catch (IOException ex) {
+      System.out.println("error in reading keys from file");
+    }
+  } 
+  
+  private void buildDoorDict(String fileIn) {
+    try {
+      Scanner sc = new Scanner(new File(fileIn));
+      int count = 0;
+      
+      while (sc.hasNextLine()) {
+        String temp = sc.nextLine().trim();
+        
+        String lockedMsg = temp.substring(0, temp.indexOf("+")).trim();
+        String unlockedMsg = temp.substring(temp.indexOf("+")+1).trim();
+        
+        allDoors.put(count, new Door(count, lockedMsg, unlockedMsg));
+        count++;
+      }
+      
+      sc.close();
+      
+    } catch (IOException ex) {
+      System.out.println("error in reading doors from file");
+    }
+  } 
+  
+  private void buildRooms() {
+    String[] vertices = new String[map.n()];
+    for (int h = 0; h < map.n(); h++) {
+      vertices[h] = map.getVertex(h);
+    }
+    
+    for (int i = 0; i < map.n(); i++) {
+      LinkedList<String> successors = map.getSuccessors(vertices[i]);
+      LinkedList<Key> activeKeys = new LinkedList<Key>();
+      
+      for (int j = 0; j < successors.size(); j++) {
+        String name = successors.get(j);
+        int keyNum = Integer.parseInt(name.substring(0,name.indexOf("r")));
+        activeKeys.add(allKeys.get(keyNum));
+      }
+      
+      String fileName = vertices[i] + ".jpg";
+      allRooms.add(new Room(fileName, activeKeys));
+    }
+      
+    for (int k = 0; k < map.n(); k++) {
+      LinkedList<String> successors = map.getSuccessors(vertices[k]);
+      LinkedList<Room> successorRooms = new LinkedList<Room>();
+
+      for (int m = 0; m < successors.size(); m++) {
+        successorRooms.add(findRoom(successors.get(m)));
+      }
+      rooms.put(findRoom(vertices[k]), successorRooms);
+    }  
+  }
+ 
+  private Room findRoom(String roomName) {
+    for (int i = 0; i < map.n(); i++) {
+      String img = allRooms.get(i).getImage();
+      if (img.substring(0,img.indexOf(".")).equals(roomName)) {
+        return allRooms.get(i);
+      }
+    }
+    return null;
+  }
+  
+  public static Key getRandomKey() {
+    int ran = (int)((Math.random() * 25) + 1);
+    return allKeys.get(ran);
+  }
+  
+  public static Hashtable<Integer, Key> getAllKeys() {
+    return allKeys;
+  }
+  
+  public Room getCurrentRoom() {
+    return currentRoom;
+  }
+  
+  public void setCurrentRoom(Room selectedRoom) {
+    currentRoom = selectedRoom;
+  }
+  
+  public Room getFinalRoom() {
+    return finalRoom;
+  }
+  
+  public Room getRoom(String roomName) {
+    for (int i = 0; i < allRooms.size(); i++) {
+      if (allRooms.get(i).getRoomName().equalsIgnoreCase(roomName)) {
+        return allRooms.get(i); 
+      }
+    }
+    return null;
+  }
+  
+  public LinkedList<Room> getConnectingRooms() {
+    return rooms.get(currentRoom);
+  }
+  
+  public Door getDoor(Room selectedRoom) {
+    String currentRoomName = currentRoom.getRoomName();
+    String selectedRoomName = selectedRoom.getRoomName();
+    
+    int doorNum = map.getWeight(currentRoomName, selectedRoomName);
+    return allDoors.get(doorNum);
+  }
+  
+  public void unlockDoor(Door lockedDoor) {
+    int doorWeight = lockedDoor.getWeight();
+    
+    for (int i = 0; i < map.n(); i++) {
+      String vertex1 = map.getVertex(i);
+      for (int j = 0; j < map.n(); j++) {
+        String vertex2 = map.getVertex(j);
+        if (map.getWeight(vertex1, vertex2) == doorWeight) {
+          map.addEdge(vertex1, vertex2, 0);
+          return;
+        }
+      }
+    }
+  }
+  
+  public boolean chancesLeft() {
+    return chancesLeft > 0;
+  }
+  
+  public int getChances() {
+    return chancesLeft;
+  }
+  
+  public void wrongAnswer() {
+    chancesLeft--;
+  }
+  
+  public String printRooms() {
+    String s = "";
+    LinkedList<Room> neighbors = rooms.get(currentRoom);
+    for (int i = 0; i < neighbors.size(); i++) {
+      String name = neighbors.get(i).getRoomName();
+      s += "[" + name.substring(0,name.indexOf("r"));
+      if (map.getWeight(currentRoom.getRoomName(),neighbors.get(i).getRoomName()) == 0) {
+        s += "+";
+      } else {
+        s += "-";
+      }
+      s += "]";
+    }
+    return s;
+  }
+  
+  public String printKeys() {
+    String s = "";
+    Key[] currentKeys = currentRoom.getRoomKeys();
+    for (int i = 0; i < currentKeys.length; i++) {
+      s += "[" + currentKeys[i].getName() + "]";
+    }
+    return s;
+  }
+  
+  /**
+   * Prints the full list of rooms and their respective neighbors in the Hashtable rooms
+   * For testing purposes
+   */
+  public void printAllRoomNeighbors() {
+    System.out.println(rooms);
+  }
+  
+  /**
+   * Prints the full list of rooms in the LinkedList allRooms
+   * For testing purposes
+   */
+  public void printAllRooms() {
+    System.out.println(allRooms);
+  }
+  
+  /**
+   * Prints the full list of keys in the hashtable allKeys
+   * For testing purposes
+   */
+  public void printAllKeys() {
+    System.out.println(allKeys);
+  }
+  
+  /**
+   * Prints the full list of doors in the hashtable allDoors
+   * For testing purposes
+   */
+  public void printAllDoors() {
+    System.out.println(allDoors);
+  }
+  
+  /**
+   * Prints the Graph, map
+   * For testing purposes
+   */
+  public void printMapGraph() {
+    System.out.println(map);
+  }
+  
+  //testing
+  public static void main(String[] args) {
+    //Testing AdjMatGraph with game map graph, with (test) and without weights (test2)
+//    AdjMatGraph<String> test = new AdjMatGraph<String>();
+//    try {
+//      AdjMatGraph.loadTGF("gameMapNoWeights.tgf", test);
+//    } catch (FileNotFoundException ex) {
+//      System.out.println("error: file not found");
+//    }
+//    System.out.println(test);
+    
+//    AdjMatGraph<String> test2 = new AdjMatGraph<String>();
+//    try {
+//      AdjMatGraph.loadTGF("gameMap.tgf", test2);
+//    } catch (FileNotFoundException ex) {
+//      System.out.println("error: file not found");
+//    }
+//    System.out.println(test2);
+    
+    GameMap map = new GameMap();
+    map.printAllKeys();
+    System.out.println();
+    map.printAllDoors();
+    System.out.println();
+    map.printAllRoomNeighbors();
+    System.out.println();
+    map.printRooms();
+    map.printMapGraph();
+  }
+}
