@@ -3,7 +3,7 @@
 ---PROGRAM REFLECION---
 
 
- CREATING NEW GAME MAP
+ CREATING A NEW GAME MAP
  + Create a .tgf with vertices that correspond to a saved image file name.
  + Not include multiple edges of the same weight unless it is of weight 0.
  + Must create the needed Text file for the Key and Dictionary in the exact format specified throughout the program.
@@ -20,7 +20,7 @@
  
   POSSIBLE FUTURE GAME EXPANSION: 
  + Control more of the IO input.
- + Automatically determine best starting and final room ad sets it
+ + Automatically determine best starting and final room and sets it
  + Use polymorphism to create diversity in key door interaction.
  + More game features such as mingames, player character
  + Store many different game maps in the program for if the player wants to continously play
